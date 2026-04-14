@@ -1,26 +1,26 @@
 {
-  "generated_at": "2026-04-14T11:58:42.852487+00:00",
+  "generated_at": "2026-04-14T17:19:57.210685+00:00",
   "items": [
     {
       "code": "TLY",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "blocked"
+      "status": "error: Max attempt limit reached. Wait for a while before trying again"
     },
     {
       "code": "PHE",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "blocked"
+      "status": "error: Max attempt limit reached. Wait for a while before trying again"
     },
     {
       "code": "DFI",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "blocked"
+      "status": "error: Max attempt limit reached. Wait for a while before trying again"
     }
   ]
 }
