@@ -1,13 +1,8 @@
 import json
-import time
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from tefas import Crawler
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,111 +20,74 @@ def load_codes():
     return codes
 
 
-def build_driver():
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--lang=tr-TR")
-    options.add_argument(
-        "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-    )
-
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    return driver
-
-
-def tr_to_float(text):
-    text = (
-        str(text)
-        .strip()
-        .replace("%", "")
-        .replace("\xa0", "")
-        .replace(" ", "")
-        .replace(".", "")
-        .replace(",", ".")
-    )
-    return float(text)
-
-
-def extract_value_by_label(driver, label_text):
-    xpath = (
-        f"//*[contains(normalize-space(.), '{label_text}')]"
-        "/following::*[self::span or self::div or self::td][1]"
-    )
-    elements = driver.find_elements(By.XPATH, xpath)
-    for el in elements:
-        txt = el.text.strip()
-        if txt:
-            return txt
-    return None
-
-
-def scrape_fund(driver, code):
-    url = f"https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod={code}"
-    driver.get(url)
-    time.sleep(5)
-
-    page = driver.page_source
-
-    if "Request Rejected" in page or "TSPD" in page or "failureConfig" in page:
-        return {
-            "code": code,
-            "price": None,
-            "daily_return": None,
-            "date": None,
-            "status": "blocked"
-        }
-
-    price_text = extract_value_by_label(driver, "Son Fiyat")
-    daily_text = extract_value_by_label(driver, "Günlük Getiri")
-
-    if not price_text or not daily_text:
-        return {
-            "code": code,
-            "price": None,
-            "daily_return": None,
-            "date": None,
-            "status": "not_found"
-        }
-
+def to_float(v):
+    if v is None:
+        return None
+    s = str(v).strip().replace(".", "").replace(",", ".")
     try:
-        price = tr_to_float(price_text)
-        daily_return = tr_to_float(daily_text) / 100.0
+        return float(s)
     except Exception:
-        return {
-            "code": code,
-            "price": None,
-            "daily_return": None,
-            "date": None,
-            "status": "parse_error"
-        }
-
-    return {
-        "code": code,
-        "price": price,
-        "daily_return": daily_return,
-        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "status": "ok"
-    }
+        return None
 
 
 def main():
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    codes = load_codes()
 
-    driver = build_driver()
+    codes = load_codes()
+    crawler = Crawler()
+
+    end = datetime.now()
+    start = end - timedelta(days=10)
+
     items = []
 
-    try:
-      for code in codes:
-          items.append(scrape_fund(driver, code))
-    finally:
-      driver.quit()
+    for code in codes:
+        try:
+            rows = crawler.fetch(
+                start=start.strftime("%Y-%m-%d"),
+                end=end.strftime("%Y-%m-%d"),
+                name=code,
+                columns=["code", "date", "price"]
+            )
+
+            if not rows or len(rows) < 1:
+                items.append({
+                    "code": code,
+                    "price": None,
+                    "daily_return": None,
+                    "date": None,
+                    "status": "no_data"
+                })
+                continue
+
+            rows = sorted(rows, key=lambda x: str(x.get("date", "")))
+            last_row = rows[-1]
+            last_price = to_float(last_row.get("price"))
+
+            prev_price = None
+            if len(rows) >= 2:
+                prev_price = to_float(rows[-2].get("price"))
+
+            daily_return = None
+            if last_price is not None and prev_price not in (None, 0):
+                daily_return = (last_price / prev_price) - 1
+
+            items.append({
+                "code": code,
+                "price": last_price,
+                "daily_return": daily_return,
+                "date": str(last_row.get("date")),
+                "status": "ok" if last_price is not None else "parse_error"
+            })
+
+        except Exception as e:
+            items.append({
+                "code": code,
+                "price": None,
+                "daily_return": None,
+                "date": None,
+                "status": f"error: {e}"
+            })
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
