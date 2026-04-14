@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-04-14T11:58:42.852487+00:00",
+  "items": [
+    {
+      "code": "TLY",
+      "price": null,
+      "daily_return": null,
+      "date": null,
+      "status": "blocked"
+    },
+    {
+      "code": "PHE",
+      "price": null,
+      "daily_return": null,
+      "date": null,
+      "status": "blocked"
+    },
+    {
+      "code": "DFI",
+      "price": null,
+      "daily_return": null,
+      "date": null,
+      "status": "blocked"
+    }
+  ]
+}
