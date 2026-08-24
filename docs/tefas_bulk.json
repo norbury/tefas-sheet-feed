@@ -1,26 +1,26 @@
 {
-  "generated_at": "2026-08-21T16:36:55.090239+00:00",
+  "generated_at": "2026-08-24T16:39:39.465245+00:00",
   "items": [
     {
       "code": "TLY",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "error: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()."
+      "status": "error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     {
       "code": "PHE",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "error: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()."
+      "status": "error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     {
       "code": "DFI",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "error: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()."
+      "status": "error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     }
   ]
 }
