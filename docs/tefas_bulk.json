@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-29T20:30:46.853508+00:00",
+  "generated_at": "2026-09-30T20:37:54.661752+00:00",
   "items": [
     {
       "code": "TLY",
       "price": null,
       "daily_return": null,
       "date": null,
-      "status": "error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "status": "error: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()."
     },
     {
       "code": "PHE",
